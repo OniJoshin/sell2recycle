@@ -43,7 +43,7 @@ php artisan migrate --seed
 ```
 
 This creates:
-- Admin user (admin@sell2recycle.test / password)
+- Admin user (admin@example.com / password)
 - Roles: admin, vendor, user
 - Sample vendors and offers (via factories)
 
