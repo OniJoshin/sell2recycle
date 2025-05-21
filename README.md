@@ -19,7 +19,7 @@ A mobile phone recycling comparison platform built with Laravel 12, Blade, Tailw
 
 ### Clone the Repo
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git clone https://github.com/OniJoshin/sell2recycle.git
 cd sell2recycle
 ```
 
