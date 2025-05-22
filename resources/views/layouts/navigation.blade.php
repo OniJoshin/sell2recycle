@@ -1,65 +1,56 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-brand text-accent-dark">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <a href="{{ route('home') }}" class="flex items-center space-x-2">
-                    <x-application-logo class="h-9 w-auto" />
-                    <span class="font-bold text-lg text-brand hidden sm:inline">Sell2Recycle</span>
-                </a>
-
-                <div class="hidden sm:flex space-x-8 ms-10 items-center text-sm font-medium">
-                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
-                    <x-nav-link :href="url('/search')" :active="request()->is('search')">Search</x-nav-link>
-                    <x-nav-link :href="url('/guides')" :active="request()->is('guides*')">Guides</x-nav-link>
-                    @auth
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
-                    @endauth
-                </div>
-            </div>
-
-            <div class="hidden sm:flex items-center">
-                @auth
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            <button class="inline-flex items-center text-sm text-gray-700">
-                                {{ Auth::user()->name }}
-                                <svg class="ml-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </x-slot>
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.edit')">Profile</x-dropdown-link>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Log Out</x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
-                @endauth
-            </div>
-
-            {{-- Hamburger --}}
-            <div class="sm:hidden flex items-center -me-2">
-                <button @click="open = ! open" class="p-2 rounded-md text-gray-500 hover:bg-gray-100">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': !open}" class="inline-flex" stroke="currentColor" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        <path :class="{'hidden': !open, 'inline-flex': open}" class="hidden" stroke="currentColor" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
+<nav x-data="{ open: false }" class="bg-gray-100 border-b border-brand text-accent-dark relative z-50">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+        <!-- Logo -->
+        <div class="flex items-center">
+            <a href="{{ route('home') }}" class="flex items-center space-x-2">
+                <x-application-logo class="h-9 w-auto" />
+                <span class="font-bold text-lg text-brand hidden sm:inline">Sell2Recycle</span>
+            </a>
         </div>
+
+        <!-- Always Visible Hamburger -->
+        <button @click="open = true"
+                class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
     </div>
 
-    {{-- Mobile Menu --}}
-    <div :class="{'block': open, 'hidden': !open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('home')">Home</x-responsive-nav-link>
-            <x-responsive-nav-link :href="url('/search')">Search</x-responsive-nav-link>
-            <x-responsive-nav-link :href="url('/guides')">Guides</x-responsive-nav-link>
-            @auth
-                <x-responsive-nav-link :href="route('dashboard')">Dashboard</x-responsive-nav-link>
-            @endauth
-        </div>
+    <!-- Slide-out Menu (Right Side) -->
+    <div x-show="open"
+        x-transition:enter="transition transform duration-300"
+        x-transition:enter-start="translate-x-full"
+        x-transition:enter-end="translate-x-0"
+        x-transition:leave="transition transform duration-200"
+        x-transition:leave-start="translate-x-0"
+        x-transition:leave-end="translate-x-full"
+        x-cloak
+        class="fixed inset-y-0 right-0 w-64 bg-white shadow-xl z-50 p-6">
+        
+        <button @click="open = false" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+
+        <a href="{{ route('home') }}" class="block mt-6 text-lg font-medium text-accent-dark hover:text-brand">Home</a>
+        <a href="{{ url('/search') }}" class="block mt-4 text-lg font-medium text-accent-dark hover:text-brand">Search</a>
+        <a href="{{ url('/guides') }}" class="block mt-4 text-lg font-medium text-accent-dark hover:text-brand">Guides</a>
+        
+        @auth
+            <a href="{{ route('dashboard') }}" class="block mt-4 text-lg font-medium text-accent-dark hover:text-brand">Dashboard</a>
+            <a href="{{ route('profile.edit') }}" class="block mt-4 text-lg font-medium text-accent-dark hover:text-brand">Profile</a>
+            <form method="POST" action="{{ route('logout') }}" class="mt-4">
+                @csrf
+                <button type="submit" class="text-lg font-medium text-accent-dark hover:text-brand">Log Out</button>
+            </form>
+        @endauth
     </div>
+
+
+    <!-- Optional: Page overlay -->
+    <div x-show="open" x-transition.opacity class="fixed inset-0 bg-black bg-opacity-30 z-40" @click="open = false" x-cloak></div>
 </nav>

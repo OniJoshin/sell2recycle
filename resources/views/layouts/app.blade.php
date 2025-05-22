@@ -22,10 +22,10 @@
     <!-- Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-gray-50 text-gray-900">
+<body class="font-sans antialiased">
     <div class="min-h-screen">
         {{-- Sticky Nav --}}
-        <header class="sticky top-0 z-50 bg-white shadow border-b border-brand">
+        <header class="sticky top-0 z-50 shadow border-b border-brand">
             @include('layouts.navigation')
         </header>
 
