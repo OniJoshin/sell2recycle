@@ -1,10 +1,14 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\VendorController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\OfferController;
+use App\Http\Controllers\Admin\DeviceController;
+use App\Http\Controllers\Admin\DeviceAliasController;
+use App\Http\Controllers\VendorController as VendorDashboardController;
+use App\Http\Controllers\Admin\VendorController as AdminVendorController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,13 +34,38 @@ Route::middleware(['auth'])->group(function () {
 
     // Vendor Dashboard
     Route::middleware('role:vendor')->group(function () {
-        Route::get('/vendor/dashboard', [VendorController::class, 'index'])->name('vendor.dashboard');
+        Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])->name('vendor.dashboard');
     });
 
     // User Dashboard
     Route::middleware('role:user')->group(function () {
         Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
     });
+
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::resource('devices', DeviceController::class);
+    });
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::resource('offers', OfferController::class);
+    });
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::resource('vendors', AdminVendorController::class);
+    });
+    Route::post('/vendors/{vendor}/refresh-feed', [AdminVendorController::class, 'refreshFeed'])
+    ->name('admin.vendors.refreshFeed');
+    Route::get('/vendors/{vendor}/offers', [AdminVendorController::class, 'showOffers'])
+    ->name('admin.vendors.offers');
+    Route::get('/vendors/{vendor}/unmatched', [VendorController::class, 'viewUnmatchedRows'])
+    ->name('admin.vendors.unmatched');
+    Route::resource('aliases', DeviceAliasController::class)
+        ->except(['show'])
+        ->names('admin.aliases');
+
+
+
+
+
+
 
 });
 

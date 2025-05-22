@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Vendor;
+use App\Models\Device;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Offer>
@@ -18,15 +19,11 @@ class OfferFactory extends Factory
     public function definition(): array
     {
         return [
-            'vendor_id' => Vendor::factory(),
-            'device_name' => $this->faker->randomElement([
-                'iPhone 13 Pro Max', 'Samsung Galaxy S21', 'Google Pixel 7'
-            ]),
-            'storage' => $this->faker->randomElement(['64GB', '128GB', '256GB']),
-            'condition' => $this->faker->randomElement(['new', 'good', 'poor', 'broken']),
+            'vendor_id' => Vendor::inRandomOrder()->first()?->id,
+            'device_id' => Device::inRandomOrder()->first()?->id,
             'network' => $this->faker->randomElement(['unlocked', 'ee', 'o2', 'vodafone']),
             'price' => $this->faker->randomFloat(2, 50, 500),
-            'valid_until' => now()->addDays(7),
+            'valid_until' => $this->faker->dateTimeBetween('now', '+1 year')
         ];
     }
 }

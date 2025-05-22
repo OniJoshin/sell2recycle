@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('offers', function (Blueprint $table) {
+        Schema::create('devices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vendor_id')->constrained()->onDelete('cascade');
-            $table->string('device_name');
+            $table->string('brand');
+            $table->string('model');
             $table->string('storage');
-            $table->string('condition');
-            $table->string('network')->default('unlocked');
-            $table->decimal('price', 8, 2);
-            $table->dateTime('valid_until')->nullable();
+            $table->enum('condition', ['new', 'good', 'poor', 'broken']);
             $table->timestamps();
         });
     }
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('offers');
+        Schema::dropIfExists('devices');
     }
 };
