@@ -55,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
     ->name('admin.vendors.refreshFeed');
     Route::get('/vendors/{vendor}/offers', [AdminVendorController::class, 'showOffers'])
     ->name('admin.vendors.offers');
-    Route::get('/vendors/{vendor}/unmatched', [VendorController::class, 'viewUnmatchedRows'])
+    Route::get('/vendors/{vendor}/unmatched', [AdminVendorController::class, 'viewUnmatchedRows'])
     ->name('admin.vendors.unmatched');
     Route::resource('aliases', DeviceAliasController::class)
         ->except(['show'])

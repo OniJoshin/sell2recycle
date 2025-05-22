@@ -15,7 +15,7 @@ class DeviceAliasController extends Controller
         return view('admin.aliases.index', compact('aliases'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $devices = \App\Models\Device::orderBy('brand')->get();
         $prefill = $request->query('prefill', '');
@@ -42,6 +42,12 @@ class DeviceAliasController extends Controller
             $filtered = array_filter($lines, function ($line) use ($aliasValue) {
                 return !str_contains(strtolower($line), strtolower($aliasValue));
             });
+
+            activity()
+                ->performedOn($request)
+                ->causedBy(auth()->user())
+                ->log("Created alias '{$request->alias}' for device ID {$request->device_id}");
+
 
             // Overwrite the unmatched file with filtered lines
             file_put_contents($filePath, implode(PHP_EOL, $filtered) . PHP_EOL);

@@ -22,11 +22,11 @@
                             <td class="px-4 py-2">{{ $row[1] ?? '' }}</td>
                             <td class="px-4 py-2">{{ $row[2] ?? '' }}</td>
                             <td class="px-4 py-2">{{ $row[3] ?? '' }}</td><td class="px-4 py-2 text-right">
-                                <a
-                                    href="{{ route('admin.aliases.create', ['prefill' => $row[0] ?? '']) }}"
-                                    class="text-blue-600 text-sm"
-                                >
+                                <a href="{{ route('admin.aliases.create', ['prefill' => $row[0] ?? '']) }}" class="text-blue-600 text-sm">
                                     ➕ Create Alias
+                                </a>
+                                <a href="{{ route('admin.devices.create', ['prefill' => $row[0] ?? '', 'vendor_id' => $vendor->id]) }}" class="text-green-600 text-sm ml-2">
+                                        ➕ Create Device
                                 </a>
                             </td>
                         </tr>

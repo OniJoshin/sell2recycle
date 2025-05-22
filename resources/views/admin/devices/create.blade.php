@@ -12,20 +12,11 @@
             </div>
             <div>
                 <label>Model</label>
-                <input type="text" name="model" class="w-full border rounded px-3 py-2" required>
+                <input type="text" name="model" value="{{ old('model', $prefill) }}" class="w-full border rounded px-3 py-2">
             </div>
             <div>
                 <label>Storage</label>
-                <input type="text" name="storage" class="w-full border rounded px-3 py-2" required>
-            </div>
-            <div>
-                <label>Condition</label>
-                <select name="condition" class="w-full border rounded px-3 py-2" required>
-                    <option value="new">New</option>
-                    <option value="good">Good</option>
-                    <option value="poor">Poor</option>
-                    <option value="broken">Broken</option>
-                </select>
+                <input type="text" name="storage" class="w-full border rounded px-3 py-2">
             </div>
             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Create Device</button>
         </form>

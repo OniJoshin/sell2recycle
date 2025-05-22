@@ -61,6 +61,12 @@ class OfferController extends Controller
             'match_method' => 'manual',
         ]);
 
+        activity()
+            ->performedOn($offer)
+            ->causedBy(auth()->user())
+            ->log("Manually updated offer for {$offer->device->model} ({$offer->condition})");
+
+
         return redirect()->route('admin.offers.index')->with('success', 'Offer updated with manual match.');
     }
 

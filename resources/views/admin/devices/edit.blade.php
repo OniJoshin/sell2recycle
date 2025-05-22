@@ -17,17 +17,7 @@
             </div>
             <div>
                 <label>Storage</label>
-                <input type="text" name="storage" value="{{ $device->storage }}" class="w-full border rounded px-3 py-2" required>
-            </div>
-            <div>
-                <label>Condition</label>
-                <select name="condition" class="w-full border rounded px-3 py-2" required>
-                    @foreach(['new', 'good', 'poor', 'broken'] as $condition)
-                        <option value="{{ $condition }}" @selected($device->condition === $condition)>
-                            {{ ucfirst($condition) }}
-                        </option>
-                    @endforeach
-                </select>
+                <input type="text" name="storage" value="{{ $device->storage }}" class="w-full border rounded px-3 py-2">
             </div>
             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Update Device</button>
         </form>

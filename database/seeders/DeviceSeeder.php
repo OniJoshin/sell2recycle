@@ -16,19 +16,15 @@ class DeviceSeeder extends Seeder
         ];
 
         $storages = ['64GB', '128GB', '256GB', '512GB'];
-        $conditions = ['new', 'good', 'poor', 'broken'];
 
         foreach ($brands as $brand => $models) {
             foreach ($models as $model) {
                 foreach ($storages as $storage) {
-                    foreach ($conditions as $condition) {
-                        Device::create([
-                            'brand' => $brand,
-                            'model' => $model,
-                            'storage' => $storage,
-                            'condition' => $condition,
-                        ]);
-                    }
+                    Device::create([
+                        'brand' => $brand,
+                        'model' => $model,
+                        'storage' => $storage,
+                    ]);
                 }
             }
         }

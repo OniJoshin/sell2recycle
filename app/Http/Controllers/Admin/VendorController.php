@@ -17,7 +17,14 @@ class VendorController extends Controller
 
     public function edit(Vendor $vendor)
     {
-        return view('admin.vendors.edit', compact('vendor'));
+        $vendor->payment_info = is_array($vendor->payment_info)
+            ? $vendor->payment_info
+            : json_decode($vendor->payment_info ?? '{}', true);
+
+        $feedLogs = $vendor->feedLogs()->latest()->take(5)->get();
+
+
+        return view('admin.vendors.edit', compact('vendor', 'feedLogs'));
     }
 
     public function update(Request $request, Vendor $vendor)
@@ -27,20 +34,18 @@ class VendorController extends Controller
             'email' => 'nullable|email',
             'feed_url' => 'nullable|url',
             'api_key' => 'nullable|string|max:255',
-            'payment_info' => 'nullable|array',
         ]);
 
-        // Save as JSON if payment_info is entered via grouped fields
-        if ($request->has('payment_method')) {
-            $data['payment_info'] = [
-                'method' => $request->payment_method,
-                'sort_code' => $request->sort_code,
-                'account_number' => $request->account_number,
-                'paypal' => $request->paypal,
-            ];
-        }
+        $data['payment_info'] = [
+            'methods' => $request->payment_methods ?? [],
+            'payout_speed' => $request->payout_speed,
+        ];
 
         $vendor->update($data);
+        activity()
+            ->performedOn($vendor)
+            ->causedBy(auth()->user())
+            ->log("Updated vendor '{$vendor->name}'");
 
         return redirect()->route('admin.vendors.index')->with('success', 'Vendor updated successfully.');
     }
@@ -61,8 +66,11 @@ class VendorController extends Controller
     public function showOffers(Vendor $vendor)
     {
         $offers = $vendor->offers()->with('device')->get();
-
-        return view('admin.vendors.offers', compact('vendor', 'offers'));
+        $unmatchedFile = storage_path("app/vendor_feeds/unmatched_{$vendor->id}.csv");
+        $unmatchedCount = file_exists($unmatchedFile)
+            ? count(file($unmatchedFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES))
+            : 0;
+        return view('admin.vendors.offers', compact('vendor', 'offers', 'unmatchedCount'));
     }
 
     public function viewUnmatchedRows(Vendor $vendor)

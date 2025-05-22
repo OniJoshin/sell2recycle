@@ -23,6 +23,7 @@ class OfferFactory extends Factory
             'device_id' => Device::inRandomOrder()->first()?->id,
             'network' => $this->faker->randomElement(['unlocked', 'ee', 'o2', 'vodafone']),
             'price' => $this->faker->randomFloat(2, 50, 500),
+            'condition' => $this->faker->randomElement(['new', 'good', 'poor', 'broken']),
             'valid_until' => $this->faker->dateTimeBetween('now', '+1 year')
         ];
     }

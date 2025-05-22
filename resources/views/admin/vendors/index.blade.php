@@ -3,8 +3,6 @@
         <h2 class="text-xl font-semibold leading-tight">Vendors</h2>
     </x-slot>
 
-    <x-alert />
-
     <div class="p-6">
         <table class="min-w-full bg-white rounded shadow">
             <thead>

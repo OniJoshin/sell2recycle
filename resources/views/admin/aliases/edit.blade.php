@@ -3,8 +3,6 @@
         <h2 class="text-xl font-semibold leading-tight">Edit Alias</h2>
     </x-slot>
 
-    <x-alert />
-
     <div class="p-6">
         <form method="POST" action="{{ route('admin.aliases.update', $alias) }}" class="space-y-4">
             @csrf @method('PUT')
@@ -19,7 +17,7 @@
                 <select name="device_id" class="w-full border rounded px-3 py-2">
                     @foreach ($devices as $device)
                         <option value="{{ $device->id }}" @selected($device->id === $alias->device_id)>
-                            {{ $device->brand }} {{ $device->model }} {{ $device->storage }} ({{ $device->condition }})
+                            {{ $device->brand }} {{ $device->model }} {{ $device->storage }}
                         </option>
                     @endforeach
                 </select>

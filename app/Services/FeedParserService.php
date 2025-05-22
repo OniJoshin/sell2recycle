@@ -2,17 +2,40 @@
 
 namespace App\Services;
 
-use App\Models\Vendor;
-use App\Models\Device;
 use App\Models\Offer;
+use App\Models\Device;
+use App\Models\Vendor;
+use League\Csv\Reader;
+use App\Models\DeviceAlias;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-use League\Csv\Reader;
+use Illuminate\Support\Facades\Storage;
 
 class FeedParserService
 {
+
     public function process(Vendor $vendor): void
     {
+        $parsed = $matched = $unmatched = $skipped = 0;
+
+        // Clear previous CSVs
+        $paths = [
+            'raw' => storage_path("app/vendor_feeds/raw_{$vendor->id}.csv"),
+            'unmatched' => storage_path("app/vendor_feeds/unmatched_{$vendor->id}.csv"),
+        ];
+
+        foreach ($paths as $label => $path) {
+            if (file_exists($path)) {
+                try {
+                    unlink($path);
+                    \Log::info("Deleted old {$label} feed for vendor {$vendor->id}");
+                } catch (\Throwable $e) {
+                    \Log::warning("Failed to delete {$label} feed for vendor {$vendor->id}: {$e->getMessage()}");
+                }
+            }
+        }
+        
+
         if (!is_dir(storage_path('app/vendor_feeds'))) {
             mkdir(storage_path('app/vendor_feeds'), 0755, true);
         }
@@ -40,31 +63,44 @@ class FeedParserService
             $csv->setHeaderOffset(0);
 
             foreach ($csv as $record) {
-                $this->processRecord($record, $vendor);
+                $parsed++;
+                $result = $this->processRecord($record, $vendor);
+
+                match ($result) {
+                    'matched' => $matched++,
+                    'unmatched' => $unmatched++,
+                    'skipped', 'invalid' => $skipped++,
+                    default => null,
+                };
             }
 
         } catch (\Throwable $e) {
             Log::error("Error parsing feed for vendor {$vendor->id}: " . $e->getMessage());
         }
+
+        \App\Models\FeedLog::create([
+            'vendor_id' => $vendor->id,
+            'offers_total' => $parsed,
+            'offers_matched' => $matched,
+            'offers_unmatched' => $unmatched,
+            'offers_skipped' => $skipped,
+        ]);
     }
 
-    protected function processRecord(array $record, Vendor $vendor): void
+    protected function processRecord(array $record, Vendor $vendor): string
     {
         if (!isset($record['product'], $record['price'], $record['network'], $record['condition'])) {
             Log::warning("Skipping invalid row: missing fields");
-            return;
+            return 'invalid';
         }
 
         if ((float) $record['price'] <= 0) {
-            return; // skip zero or negative prices
+            return 'skipped';
         }
 
-        // Attempt to match product to a Device
-        $match = $this->matchDevice($record['product'], $record['condition']);
+        $match = $this->matchDevice($record['product']);
         $device = $match['device'];
         $method = $match['method'];
-
-
 
         if (!$device) {
             Log::info("Unmatched product: " . $record['product']);
@@ -82,9 +118,8 @@ class FeedParserService
                 FILE_APPEND
             );
 
-            return;
+            return 'unmatched';
         }
-
 
         $existing = Offer::where([
             'vendor_id' => $vendor->id,
@@ -93,30 +128,36 @@ class FeedParserService
         ])->first();
 
         if ($existing && $existing->match_method === 'manual') {
-            return; // skip updating this offer
+            return 'skipped';
         }
 
         Offer::updateOrCreate([
             'vendor_id' => $vendor->id,
             'device_id' => $device->id,
             'network' => $record['network'],
+            'condition' => $record['condition'],
         ], [
             'price' => $record['price'],
+            'vendor_product_id' => $record['vendor_product_id'] ?? null,
+            'product_url' => $record['link'] ?? null,
+            'category' => $record['category'] ?? 'phone',
             'valid_until' => now()->addDays(1),
             'match_method' => $method,
         ]);
 
+        return 'matched';
     }
 
-   protected function matchDevice(string $product, string $condition): array
-    {
-        $alias = \App\Models\DeviceAlias::where('alias', 'like', '%' . $product . '%')->first();
 
-        if ($alias && $alias->device && $alias->device->condition === $condition) {
+   protected function matchDevice(string $product): array
+    {
+        $alias = DeviceAlias::where('alias', 'like', '%' . $product . '%')->first();
+
+        if ($alias && $alias->device) {
             return ['device' => $alias->device, 'method' => 'alias'];
         }
 
-        $candidates = Device::where('condition', $condition)->get();
+        $candidates = Device::all();
 
         $bestMatch = null;
         $bestScore = PHP_INT_MAX;
@@ -137,7 +178,4 @@ class FeedParserService
 
         return ['device' => null, 'method' => null];
     }
-
-
-
 }

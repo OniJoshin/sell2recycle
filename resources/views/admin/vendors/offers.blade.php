@@ -1,9 +1,19 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight">
-            Offers for {{ $vendor->name }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold leading-tight">
+                Offers for {{ $vendor->name }}
+            </h2>
+
+            @if($unmatchedCount > 0)
+                <a href="{{ route('admin.vendors.unmatched', $vendor) }}"
+                class="inline-block bg-orange-100 text-orange-800 px-3 py-1 rounded text-sm hover:bg-orange-200">
+                    View Unmatched Products ({{ $unmatchedCount }})
+                </a>
+            @endif
+        </div>
     </x-slot>
+
 
     <div class="p-6">
         <table class="min-w-full bg-white rounded shadow">
@@ -19,7 +29,7 @@
             <tbody>
                 @foreach ($offers as $offer)
                 <tr class="border-t">
-                    <td class="px-4 py-2">{{ $offer->device->brand }} {{ $offer->device->model }} {{ $offer->device->storage }} ({{ $offer->device->condition }})</td>
+                    <td class="px-4 py-2">{{ $offer->device->brand }} {{ $offer->device->model }} {{ $offer->device->storage }}</td>
                     <td class="px-4 py-2">£{{ number_format($offer->price, 2) }}</td>
                     <td class="px-4 py-2">{{ $offer->network }}</td>
                     <td class="px-4 py-2">{{ $offer->valid_until?->format('Y-m-d') ?? 'N/A' }}</td>

@@ -14,9 +14,12 @@ class DeviceController extends Controller
         return view('admin.devices.index', compact('devices'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return view('admin.devices.create');
+        $prefill = $request->query('prefill', '');
+        $vendorId = $request->query('vendor_id');
+
+        return view('admin.devices.create', compact('prefill', 'vendorId'));
     }
 
     public function store(Request $request)
@@ -24,11 +27,35 @@ class DeviceController extends Controller
         $validated = $request->validate([
             'brand' => 'required|string|max:255',
             'model' => 'required|string|max:255',
-            'storage' => 'required|string|max:255',
-            'condition' => 'required|in:new,good,poor,broken',
+            'storage' => 'nullable|string|max:255',
         ]);
 
         Device::create($validated);
+
+        // Optional alias auto-linking
+        if ($request->has('prefill') && $request->prefill && $request->vendor_id) {
+            \App\Models\DeviceAlias::create([
+                'alias' => $request->prefill,
+                'device_id' => $device->id,
+            ]);
+            activity()
+                ->performedOn($device)
+                ->causedBy(auth()->user())
+                ->log("Auto-created alias '{$request->prefill}'");
+
+            $filePath = storage_path("app/vendor_feeds/unmatched_{$request->vendor_id}.csv");
+
+            if (file_exists($filePath)) {
+                $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                $filtered = array_filter($lines, fn($line) => !str_contains(strtolower($line), strtolower($request->prefill)));
+                file_put_contents($filePath, implode(PHP_EOL, $filtered) . PHP_EOL);
+            }
+            activity()
+                ->performedOn($device)
+                ->causedBy(auth()->user())
+                ->log("Created device '{$device->brand} {$device->model} {$device->storage}' from unmatched row");
+        }
+
 
         return redirect()->route('admin.devices.index')->with('success', 'Device created.');
     }
@@ -43,8 +70,7 @@ class DeviceController extends Controller
         $validated = $request->validate([
             'brand' => 'required|string|max:255',
             'model' => 'required|string|max:255',
-            'storage' => 'required|string|max:255',
-            'condition' => 'required|in:new,good,poor,broken',
+            'storage' => 'nullable|string|max:255',
         ]);
 
         $device->update($validated);
