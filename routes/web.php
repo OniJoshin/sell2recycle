@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
@@ -10,9 +11,11 @@ use App\Http\Controllers\Admin\DeviceAliasController;
 use App\Http\Controllers\VendorController as VendorDashboardController;
 use App\Http\Controllers\Admin\VendorController as AdminVendorController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// web.php
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::get('/compare/{brand}/{model}/{slug}', [DeviceController::class, 'show']);
+Route::get('/search', [SearchController::class, 'index'])->name('search');
 
 // Authenticated group
 Route::middleware(['auth'])->group(function () {

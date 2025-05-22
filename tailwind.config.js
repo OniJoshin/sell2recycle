@@ -15,6 +15,18 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
         },
+        colors: {
+            brand: {
+                DEFAULT: '#32B44A',       // Primary brand green
+                dark: '#278A39',          // Optional darker variant
+                light: '#C9F3D4',         // Optional light background
+            },
+                accent: {
+                dark: '#041832',          // Navy blue for contrast (text, footer)
+                light: '#4EAED3',         // Sky blue for supporting visuals
+            }
+        },
+
     },
 
     plugins: [forms],
